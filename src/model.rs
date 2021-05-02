@@ -100,6 +100,8 @@ use std::ops::Deref;
 //use std::rc::Rc;
 use std::sync::Arc;
 
+use pyo3::prelude::*;
+
 /// An
 /// [IRI](https://en.wikipedia.org/wiki/Internationalized_Resource_Identifier)
 /// is an internationalized version of an URI/URL.
@@ -107,8 +109,21 @@ use std::sync::Arc;
 /// Here, we represent it as a simple string. In Horned-OWL IRIs are
 /// created through `Build`; this caches the underlying String meaning
 /// that IRIs are light-weight to `clone`.
+#[pyclass]
 #[derive(Clone, Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub struct IRI(Arc<String>);
+
+#[pymethods]
+impl IRI {
+    #[getter]
+    fn iri(&self) -> PyResult<String> {
+        Ok(self.0.to_string())
+    }
+    #[setter]
+    fn set_iri(&self, new_iri: String) -> PyResult<()>{
+        
+    }
+}
 
 impl AsRef<str> for IRI {
     fn as_ref(&self) -> &str {
