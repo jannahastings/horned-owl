@@ -117,11 +117,7 @@ pub struct IRI(Arc<String>);
 impl IRI {
     #[getter]
     fn iri(&self) -> PyResult<String> {
-        Ok(self.0.to_string())
-    }
-    #[setter]
-    fn set_iri(&self, new_iri: String) -> PyResult<()>{
-        
+        Ok((*self.0).clone())
     }
 }
 
@@ -342,6 +338,7 @@ macro_rules! named {
 
         $(
             $(#[$attr]) *
+            #[pyclass]
             #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
             pub struct $name(pub IRI);
 
@@ -407,6 +404,14 @@ macro_rules! named {
                 }
 
             }
+            #[pymethods]
+            impl $name {
+                #[getter]
+                fn iri(&self) -> PyResult<String> {
+                    Ok((*(self.0).0).clone())
+                }
+            }
+
         ) *
     }
 }
@@ -505,6 +510,7 @@ pub trait Kinded {
 }
 
 /// An `AnnotatedAxiom` is an `Axiom` with one orpmore `Annotation`.
+#[pyclass]
 #[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
 pub struct AnnotatedAxiom {
     pub axiom: Axiom,
@@ -590,6 +596,7 @@ macro_rules! axiom {
     ($name:ident ($($tt:ty),*) $(#[$attr:meta])*) =>
     {
         $(#[$attr]) *
+        #[pyclass]
         #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
         pub struct $name($(pub $tt),*);
         axiomimpl!($name);
@@ -600,6 +607,7 @@ macro_rules! axiom {
     $(#[$attr:meta])*
     ) => {
         $(#[$attr]) *
+        #[pyclass]
         #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
         pub struct $name
         {
@@ -1126,6 +1134,7 @@ impl Literal {
 ///
 /// Annotations are associated an IRI and describe that IRI in a
 /// particular way, defined by the property.
+#[pyclass]
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Annotation {
     pub ap: AnnotationProperty,
@@ -1223,6 +1232,7 @@ impl From<DataProperty> for PropertyExpression {
 }
 
 // Data!!!
+#[pyclass]
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct FacetRestriction {
     pub f: Facet,
@@ -1449,6 +1459,7 @@ impl From<Class> for Box<ClassExpression> {
 /// An ontology is identified by an IRI which is expected to remain
 /// stable over the lifetime of the ontology, and a version IRI which
 /// is expected to change between versions.
+#[pyclass]
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct OntologyID {
     pub iri: Option<IRI>,
